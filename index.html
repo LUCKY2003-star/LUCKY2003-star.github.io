@@ -1,160 +1,114 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>浪漫圣诞树</title>
-    <style>
-        body {
-            margin: 0;
-            padding: 0;
-            background: #000;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        
-        .tree {
-            position: relative;
-            width: 300px;
-            height: 500px;
-        }
-        
-        .lights {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        
-        .light {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            animation: twinkle 1s infinite alternate;
-        }
-        
-        .star {
-            position: absolute;
-            top: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 30px;
-            height: 30px;
-            background: gold;
-            clip-path: polygon(
-                50% 0%,
-                61% 35%,
-                98% 35%,
-                68% 57%,
-                79% 91%,
-                50% 70%,
-                21% 91%,
-                32% 57%,
-                2% 35%,
-                39% 35%
-            );
-            animation: glow 1s infinite alternate;
-        }
-        
-        .snow {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-        }
-        
-        @keyframes twinkle {
-            0% { opacity: 0.3; }
-            100% { opacity: 1; }
-        }
-        
-        @keyframes glow {
-            0% { box-shadow: 0 0 5px gold; }
-            100% { box-shadow: 0 0 20px gold, 0 0 30px gold; }
-        }
-        
-        @keyframes fall {
-            0% { transform: translateY(-10px) rotate(0deg); }
-            100% { transform: translateY(500px) rotate(360deg); }
-        }
-    </style>
-</head>
-<body>
-    <div class="tree">
-        <div class="star"></div>
-        <div class="lights" id="lights"></div>
-        <div class="snow" id="snow"></div>
-    </div>
-
-    <script>
-        // 创建圣诞树灯光
-        const lightsContainer = document.getElementById('lights');
-        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
-        
-        // 创建三角形圣诞树
-        for (let i = 0; i < 150; i++) {
-            const light = document.createElement('div');
-            light.className = 'light';
-            
-            // 随机位置 (三角形区域内)
-            let x, y;
-            const layer = Math.floor(Math.random() * 3); // 0, 1, 2
-            
-            if (layer === 0) {
-                // 底层
-                y = 300 + Math.random() * 200;
-                x = 150 - (y - 300) * 0.5 + Math.random() * (y - 300);
-            } else if (layer === 1) {
-                // 中层
-                y = 150 + Math.random() * 150;
-                x = 150 - (y - 150) * 0.75 + Math.random() * (y - 150) * 1.5;
-            } else {
-                // 顶层
-                y = 50 + Math.random() * 100;
-                x = 150 - (y - 50) + Math.random() * (y - 50) * 2;
-            }
-            
-            light.style.left = x + 'px';
-            light.style.top = y + 'px';
-            light.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
-            light.style.animationDelay = Math.random() + 's';
-            
-            lightsContainer.appendChild(light);
-        }
-        
-        // 创建雪花效果
-        const snowContainer = document.getElementById('snow');
-        
-        function createSnowflake() {
-            const snowflake = document.createElement('div');
-            snowflake.style.position = 'absolute';
-            snowflake.style.width = Math.random() * 5 + 3 + 'px';
-            snowflake.style.height = snowflake.style.width;
-            snowflake.style.backgroundColor = 'white';
-            snowflake.style.borderRadius = '50%';
-            snowflake.style.left = Math.random() * 300 + 'px';
-            snowflake.style.top = '-10px';
-            snowflake.style.opacity = Math.random() * 0.5 + 0.5;
-            
-            const animationDuration = Math.random() * 3 + 2;
-            snowflake.style.animation = `fall ${animationDuration}s linear infinite`;
-            
-            snowContainer.appendChild(snowflake);
-            
-            // 移除雪花以优化性能
-            setTimeout(() => {
-                snowflake.remove();
-            }, animationDuration * 1000);
-        }
-        
-        // 定期创建雪花
-        setInterval(createSnowflake, 100);
-        
-        // 初始创建一些雪花
-        for (let i = 0; i < 20; i++) {
-            setTimeout(createSnowflake, Math.random() * 2000);
-        }
-    </script>
-</body>
-</html>
+import turtle as  t
+from turtle import *
+import random as r
+import  time
+ 
+#定义几个函数先
+ 
+#定义画彩灯的函数
+def drawlight():
+    if r.randint(0,30) == 0:
+        color('tomato')
+        circle(6)
+    elif r.randint(0,30) == 1:
+        color('orange')
+        circle(3)
+    else:
+        linewidth = 5
+        color('dark green')
+ 
+#定义画圣诞树的函数
+def tree(d,s):
+    if d <= 0:  return
+    forward(s)
+    tree(d-1, s * .8)
+    right(120)
+    tree(d-3, s * .5)
+    drawlight()
+    right(120)
+    tree(d-3, s * .5)
+    right(120)
+    backward(s)
+ 
+#定义树下面小装饰的函数
+def  xzs():
+    for i in range(200):
+        a = 200-400* r.random()
+        b = 10 -20* r.random()
+        up()
+        forward(b)
+        left(90)
+        forward(a)
+        down()
+        if  r.randint(0,1) == 0:
+            color('tomato')
+        else:
+            color('wheat')
+        circle(2)
+        up()
+        backward(a)
+        right(90)
+        backward(b)
+ 
+#定义一个画雪花的函数
+def drawsnow():
+    t.hideturtle()
+    t.pensize(2)
+    for i in range(200):
+        t.pencolor("white")
+        t.penup()
+        t.setx(r.randint(-350,350))
+        t.sety(r.randint(-100,350))
+        t.pendown()
+        dens = 6
+        snowsize = r.randint(1,10)
+        for j in range(dens):
+            t.forward(int(snowsize))
+            t.backward(int(snowsize))
+            t.right(int(360/dens))
+ 
+ 
+n=100.0
+t.pensize(10)
+speed("fastest")
+t.screensize(800,600, "black")
+left(90)
+forward(3 * n)
+color("orange", "yellow")
+begin_fill()
+left(126)
+ 
+ 
+#画五角星
+for i in range(5):
+    forward(n/5)
+    right(144)
+    forward(n/5)
+    left(72)
+ 
+end_fill()
+right(126)
+ 
+color("dark green")
+backward(n * 4.8)
+ 
+ 
+#调用画树的函数
+tree(15 , n)
+backward(n/2)
+ 
+xzs()
+ 
+#写文字
+t.color("dark red", "red")
+t.write("Merry Christmas", align="center", font=("Comic Sans MS", 40, "bold"))
+ 
+ 
+ 
+# 调用雪花函数
+drawsnow()
+ 
+t.done()    #收笔
+————————————————
+版权声明：本文为CSDN博主「网络豆」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
+原文链接：https://blog.csdn.net/yj11290301/article/details/128239545
