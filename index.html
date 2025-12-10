@@ -1,74 +1,179 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Christmas Tree</title>
+    <title>圣诞粒子树</title>
     <style>
-        body { margin: 0; background: radial-gradient(ellipse at center, #1a2a6c 0%, #0a1029 100%); }
-        #root { width: 100vw; height: 100vh; }
-        .btn { 
-            position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-            padding: 10px 20px; background: linear-gradient(to right, #B8860B, #FFD700);
-            color: #0A4D3C; font-size: 18px; font-weight: bold; border: none; border-radius: 8px;
-            cursor: pointer; box-shadow: 0 0 10px #FFEA80;
+        * { margin: 0; padding: 0; }
+        body { 
+            background: radial-gradient(ellipse at center, #1a2a6c 0%, #0a1029 100%);
+            overflow: hidden;
+        }
+        #canvas { display: block; }
+        .btn {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 25px;
+            background: linear-gradient(to right, #FFD700, #FFEA80);
+            color: #1a2a6c;
+            font-size: 20px;
+            font-weight: bold;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 0 15px #FFD700;
+            z-index: 10;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-    <button class="btn" onclick="toggleState()">Form the Tree</button>
+    <canvas id="canvas"></canvas>
+    <button class="btn">圣诞节快乐</button>
 
     <script>
-        // 内联 React + ReactDOM（简化版）
-        const React = {
-            createElement: (type, props, ...children) => ({ type, props: { ...props, children } }),
-            useState: (init) => {
-                let state = init;
-                const setState = (newVal) => {
-                    state = typeof newVal === 'function' ? newVal(state) : newVal;
-                    render();
-                };
-                return [state, setState];
+        // 获取Canvas
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // 调整Canvas大小
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        // 粒子类（构成圣诞树）
+        class Particle {
+            constructor() {
+                // 初始随机位置
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                // 目标位置（圣诞树形状）
+                this.targetX = canvas.width / 2 + (Math.random() - 0.5) * 180;
+                const treeHeight = 300;
+                const treeWidth = 200;
+                const yRatio = (this.targetX - (canvas.width/2)) / (treeWidth/2);
+                this.targetY = canvas.height / 2 - treeHeight/2 + Math.abs(yRatio) * treeHeight * 0.6;
+                // 粒子大小
+                this.size = 2 + Math.random() * 3;
+                // 荧光粉色
+                this.color = `rgba(255, 105, 180, ${0.7 + Math.random() * 0.3})`;
+                // 移动速度
+                this.speed = 0.01 + Math.random() * 0.02;
+                this.progress = 0;
             }
-        };
-        const ReactDOM = { render: (el, root) => root.innerHTML = '' };
 
-        // 内联 Three.js 核心（简化版）
-        const THREE = {
-            Vector3: class { constructor(x=0,y=0,z=0) { this.x=x; this.y=y; this.z=z; } },
-            MathUtils: { lerp: (a,b,t) => a + (b-a)*t },
-            BufferGeometry: class {},
-            BufferAttribute: class { constructor(arr, itemSize) { this.array = arr; this.itemSize = itemSize; } },
-            Points: class { constructor(geo, mat) { this.geometry = geo; this.material = mat; } },
-            ShaderMaterial: class { constructor(opts) { this.uniforms = opts.uniforms; } },
-            Mesh: class { constructor(geo, mat) { this.geometry = geo; this.material = mat; this.position = new THREE.Vector3(); } },
-            ConeGeometry: class {},
-            MeshBasicMaterial: class { constructor(opts) { this.color = opts.color; } }
-        };
+            update() {
+                // 从随机位置插值到目标位置
+                this.progress += this.speed;
+                if (this.progress > 1) this.progress = 1;
+                this.x = this.lerp(this.x, this.targetX, this.progress);
+                this.y = this.lerp(this.y, this.targetY, this.progress);
+            }
 
-        // 内联 R3F 核心（简化版）
-        const R3F = {
-            Canvas: ({ children }) => children,
-            useFrame: (cb) => setInterval(() => cb({ clock: { getElapsedTime: () => Date.now()/1000 } }), 16)
-        };
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                // 荧光效果
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = "rgba(255, 105, 180, 0.8)";
+            }
 
-        // 圣诞树逻辑
-        let treeState = 'CHAOS';
-        function toggleState() {
-            treeState = treeState === 'CHAOS' ? 'FORMED' : 'CHAOS';
-            document.querySelector('.btn').textContent = treeState === 'CHAOS' ? 'Form the Tree' : 'Scatter the Magic';
+            lerp(a, b, t) {
+                return a + (b - a) * t;
+            }
         }
 
-        // 渲染圣诞树
-        function render() {
-            const root = document.getElementById('root');
-            root.innerHTML = '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;"><div style="width:200px;height:300px;background:#0A4D3C;border-radius:50% 50% 0 0;position:relative;">'
-                + '<div style="width:60px;height:80px;background:#B8860B;position:absolute;bottom:-80px;left:70px;border-radius:0 0 10px 10px;"></div>'
-                + '<div style="width:40px;height:40px;background:#FFD700;position:absolute;top:-20px;left:80px;transform:rotate(45deg);box-shadow:0 0 10px #FFEA80;"></div>'
-                + '</div></div>';
+        // 雪花类
+        class Snowflake {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = -Math.random() * 50;
+                this.size = 2 + Math.random() * 4;
+                this.speedY = 1 + Math.random() * 2;
+                this.speedX = (Math.random() - 0.5) * 0.5;
+                this.opacity = 0.5 + Math.random() * 0.5;
+            }
+
+            update() {
+                this.y += this.speedY;
+                this.x += this.speedX;
+                if (this.y > canvas.height) this.reset();
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+                ctx.fill();
+                ctx.shadowBlur = 5;
+                ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
+            }
         }
-        render();
+
+        // 初始化元素
+        const particles = [];
+        const snowflakes = [];
+        // 创建300个粒子（圣诞树）
+        for (let i = 0; i < 300; i++) particles.push(new Particle());
+        // 创建80片雪花
+        for (let i = 0; i < 80; i++) snowflakes.push(new Snowflake());
+
+        // 动画循环
+        function animate() {
+            // 半透明背景（拖影效果）
+            ctx.fillStyle = "rgba(10, 16, 41, 0.2)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 更新并绘制粒子
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            // 更新并绘制雪花
+            snowflakes.forEach(s => {
+                s.update();
+                s.draw();
+            });
+
+            // 绘制圣诞树顶部星星
+            const starX = canvas.width / 2;
+            const starY = canvas.height / 2 - 180;
+            drawStar(starX, starY, 20, 12, 5);
+            ctx.fillStyle = "rgba(255, 215, 0, 0.9)";
+            ctx.fill();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(255, 215, 0, 0.8)";
+
+            requestAnimationFrame(animate);
+        }
+
+        // 绘制五角星
+        function drawStar(x, y, outerRadius, innerRadius, points) {
+            ctx.beginPath();
+            const angle = Math.PI / points;
+            for (let i = 0; i < 2 * points; i++) {
+                const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                const px = x + Math.cos(i * angle) * radius;
+                const py = y + Math.sin(i * angle) * radius;
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+        }
+
+        // 启动动画
+        animate();
     </script>
 </body>
 </html>
