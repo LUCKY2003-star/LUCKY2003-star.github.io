@@ -44,7 +44,7 @@
             canvas.height = window.innerHeight;
         }
 
-        // 粒子类（实心分层三角形）
+        // 粒子类（修正三角形尖点方向）
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
@@ -55,33 +55,33 @@
                 this.layer = Math.floor(Math.random() * 3); // 0=顶层 1=中层 2=底层
                 const layerHeight = totalTreeHeight / 3;
 
-                // 顶层（实心小三角形）
+                // 顶层（尖点朝上，对准星星）
                 if (this.layer === 0) {
                     const layerWidth = 80;
                     this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
-                    // 三角形区域约束：Y在层高度内，且在斜边下方
-                    const maxY = starY + layerHeight;
+                    // 尖点朝上：Y在层高度内，离中心越远，Y越接近层的上边缘
                     const minY = starY;
+                    const maxY = starY + layerHeight;
                     const slope = layerHeight / (layerWidth/2);
-                    this.targetY = minY + Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
                 }
-                // 中层（实心中三角形）
+                // 中层（尖点朝上）
                 else if (this.layer === 1) {
                     const layerWidth = 140;
                     this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
-                    const maxY = starY + layerHeight * 2;
                     const minY = starY + layerHeight;
+                    const maxY = starY + layerHeight * 2;
                     const slope = layerHeight / (layerWidth/2);
-                    this.targetY = minY + Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
                 }
-                // 底层（实心大三角形）
+                // 底层（尖点朝上）
                 else {
                     const layerWidth = 200;
                     this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
-                    const maxY = starY + layerHeight * 3;
                     const minY = starY + layerHeight * 2;
+                    const maxY = starY + layerHeight * 3;
                     const slope = layerHeight / (layerWidth/2);
-                    this.targetY = minY + Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
                 }
 
                 this.size = 2 + Math.random() * 3;
@@ -141,7 +141,6 @@
             }
         }
 
-        // 增加粒子密度（填充三角形）
         const particles = [];
         const snowflakes = [];
         for (let i = 0; i < 600; i++) particles.push(new Particle());
