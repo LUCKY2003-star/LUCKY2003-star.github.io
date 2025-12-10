@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>实心圣诞粒子树</title>
+    <title>圣诞粒子树-文字特效</title>
     <style>
         * { margin: 0; padding: 0; }
         body { 
@@ -42,181 +42,61 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const btn = document.querySelector('.btn');
-        resizeCanvas();
-        window.addEventListener('resize', resizeCanvas);
-
-        // 文字粒子相关变量
+        let isTextActive = false;
         let textParticles = [];
-        let isTextShowing = false;
         const text = "孙思诺我喜欢你";
-        const fontSize = 60;
-        const textColor = "#FF69B4"; // 粉红色
+        const textColor = "rgba(255, 105, 180, 0.9)"; // 粉红色
 
-        // 点击按钮触发文字粒子效果
-        btn.addEventListener('click', () => {
-            if (!isTextShowing) {
-                createTextParticles();
-                isTextShowing = true;
-            }
-        });
-
-        function resizeCanvas() {
+        // 初始化画布
+        function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            
-            // 重新创建文字粒子（窗口调整大小时）
-            if (isTextShowing) {
-                textParticles = [];
-                createTextParticles();
-            }
         }
+        initCanvas();
+        window.addEventListener('resize', initCanvas);
 
-        // 创建文字粒子
-        function createTextParticles() {
-            // 先绘制文字到离屏画布获取像素数据
-            const offscreenCanvas = document.createElement('canvas');
-            const offscreenCtx = offscreenCanvas.getContext('2d');
-            
-            // 设置离屏画布大小
-            offscreenCanvas.width = canvas.width;
-            offscreenCanvas.height = canvas.height;
-            
-            // 在离屏画布上绘制文字
-            offscreenCtx.font = `bold ${fontSize}px "Microsoft YaHei", sans-serif`;
-            offscreenCtx.textAlign = 'center';
-            offscreenCtx.textBaseline = 'middle';
-            offscreenCtx.fillStyle = 'white';
-            offscreenCtx.fillText(text, canvas.width / 2, canvas.height / 2);
-            
-            // 获取像素数据
-            const imageData = offscreenCtx.getImageData(0, 0, canvas.width, canvas.height);
-            const pixels = imageData.data;
-            
-            // 遍历像素创建粒子（只在文字像素位置创建）
-            textParticles = [];
-            for (let y = 0; y < canvas.height; y += 4) { // 每隔4个像素采样一次，控制粒子密度
-                for (let x = 0; x < canvas.width; x += 4) {
-                    const index = (y * canvas.width + x) * 4;
-                    const alpha = pixels[index + 3];
-                    
-                    if (alpha > 128) { // 只在有文字的位置创建粒子
-                        textParticles.push(new TextParticle(x, y));
-                    }
-                }
-            }
-        }
-
-        // 文字粒子类
-        class TextParticle {
-            constructor(targetX, targetY) {
-                // 粒子初始位置随机分布在画布上
-                this.x = Math.random() * canvas.width;
-                this.y = Math.random() * canvas.height;
-                
-                // 目标位置（文字像素位置）
-                this.targetX = targetX;
-                this.targetY = targetY;
-                
-                // 粉红色系颜色变化
-                const hue = 340 + Math.random() * 20; // 粉红色色相范围
-                this.color = `hsla(${hue}, 100%, 70%, ${0.8 + Math.random() * 0.2})`;
-                
-                this.size = 1.5 + Math.random() * 2;
-                this.speed = 0.008 + Math.random() * 0.012;
-                this.progress = 0;
-            }
-
-            update() {
-                this.progress += this.speed;
-                if (this.progress > 1) this.progress = 1;
-                
-                // 缓动函数，让粒子运动更自然
-                const easeProgress = this.easeOutCubic(this.progress);
-                this.x = this.lerp(this.x, this.targetX, easeProgress);
-                this.y = this.lerp(this.y, this.targetY, easeProgress);
-            }
-
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                
-                // 添加光晕效果
-                ctx.shadowBlur = 8;
-                ctx.shadowColor = this.color.replace(/[^,]+(?=\))/, '0.7');
-            }
-
-            lerp(a, b, t) {
-                return a + (b - a) * t;
-            }
-
-            // 缓动函数
-            easeOutCubic(t) {
-                return 1 - Math.pow(1 - t, 3);
-            }
-        }
-
-        // 圣诞树粒子类（填充三层三角形区域，实现实心树）
-        class Particle {
+        // 圣诞树粒子类
+        class TreeParticle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 const centerX = canvas.width / 2;
-                const starY = canvas.height / 2 - 180; // 树顶星星Y坐标
-                const totalTreeHeight = 300; // 圣诞树总高度
-                this.layer = Math.floor(Math.random() * 3); // 0=顶层 1=中层 2=底层
+                const starY = canvas.height / 2 - 180;
+                const totalTreeHeight = 300;
+                this.layer = Math.floor(Math.random() * 3);
                 const layerHeight = totalTreeHeight / 3;
-                const layerYStart = starY + this.layer * layerHeight; // 每层的Y起始位置
+                const layerYStart = starY + this.layer * layerHeight;
 
-                // 每层三角形的宽度和范围（确保粒子填满区域）
                 let layerWidth, maxXOffset, minY, maxY;
                 if (this.layer === 0) {
-                    layerWidth = 80;
-                    maxXOffset = layerWidth / 2;
-                    minY = layerYStart;
-                    maxY = layerYStart + layerHeight;
+                    layerWidth = 80; maxXOffset = 40; minY = layerYStart; maxY = layerYStart + layerHeight;
                 } else if (this.layer === 1) {
-                    layerWidth = 150;
-                    maxXOffset = layerWidth / 2;
-                    minY = layerYStart;
-                    maxY = layerYStart + layerHeight;
+                    layerWidth = 150; maxXOffset = 75; minY = layerYStart; maxY = layerYStart + layerHeight;
                 } else {
-                    layerWidth = 220;
-                    maxXOffset = layerWidth / 2;
-                    minY = layerYStart;
-                    maxY = layerYStart + layerHeight;
+                    layerWidth = 220; maxXOffset = 110; minY = layerYStart; maxY = layerYStart + layerHeight;
                 }
 
-                // 随机X（在层宽度范围内）
                 this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
-                // 随机Y（在层高度内，且满足三角形斜率：离中心越远，Y越接近层底部）
                 const slope = layerHeight / maxXOffset;
                 const xOffset = Math.abs(this.targetX - centerX);
                 const minLayerY = minY + xOffset * slope;
                 this.targetY = minLayerY + Math.random() * (maxY - minLayerY);
 
-                // 圣诞色调（增加绿色占比，保持红/粉点缀）
                 const colorProb = Math.random();
-                if (colorProb < 0.6) {
-                    this.color = `rgba(34, 139, 34, ${0.8 + Math.random() * 0.2})`; // 绿（60%）
-                } else if (colorProb < 0.85) {
-                    this.color = `rgba(255, 105, 180, ${0.8 + Math.random() * 0.2})`; // 粉（25%）
-                } else {
-                    this.color = `rgba(255, 69, 0, ${0.8 + Math.random() * 0.2})`; // 红（15%）
-                }
-                this.size = 2 + Math.random() * 2; // 更小粒子，填充更密集
+                if (colorProb < 0.6) this.color = `rgba(34, 139, 34, ${0.8 + Math.random() * 0.2})`;
+                else if (colorProb < 0.85) this.color = `rgba(255, 105, 180, ${0.8 + Math.random() * 0.2})`;
+                else this.color = `rgba(255, 69, 0, ${0.8 + Math.random() * 0.2})`;
+                
+                this.size = 2 + Math.random() * 2;
                 this.speed = 0.004 + Math.random() * 0.006;
                 this.progress = 0;
             }
-
             update() {
                 this.progress += this.speed;
                 if (this.progress > 1) this.progress = 1;
                 this.x = this.lerp(this.x, this.targetX, this.progress);
                 this.y = this.lerp(this.y, this.targetY, this.progress);
             }
-
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -225,17 +105,59 @@
                 ctx.shadowBlur = 6;
                 ctx.shadowColor = this.color.replace(/[^,]+(?=\))/, '0.6');
             }
-
-            lerp(a, b, t) {
-                return a + (b - a) * t;
-            }
+            lerp(a, b, t) { return a + (b - a) * t; }
         }
 
+        // 文字粒子类（直接生成文字轮廓粒子）
+        class TextParticle {
+            constructor(targetX, targetY) {
+                // 初始位置随机分布在画布边缘
+                const edge = Math.floor(Math.random() * 4);
+                if (edge === 0) { // 顶部
+                    this.x = Math.random() * canvas.width;
+                    this.y = -20;
+                } else if (edge === 1) { // 右侧
+                    this.x = canvas.width + 20;
+                    this.y = Math.random() * canvas.height;
+                } else if (edge === 2) { // 底部
+                    this.x = Math.random() * canvas.width;
+                    this.y = canvas.height + 20;
+                } else { // 左侧
+                    this.x = -20;
+                    this.y = Math.random() * canvas.height;
+                }
+
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.color = textColor;
+                this.size = 2 + Math.random() * 1.5;
+                this.speed = 0.006 + Math.random() * 0.008;
+                this.progress = 0;
+            }
+            update() {
+                this.progress += this.speed;
+                if (this.progress > 1) this.progress = 1;
+                const ease = this.easeOutCubic(this.progress);
+                this.x = this.lerp(this.x, this.targetX, ease);
+                this.y = this.lerp(this.y, this.targetY, ease);
+            }
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = "rgba(255, 105, 180, 0.7)";
+            }
+            lerp(a, b, t) { return a + (b - a) * t; }
+            easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
+        }
+
+        // 雪花类
         class Snowflake {
             constructor() {
                 this.reset();
             }
-
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = -Math.random() * 50;
@@ -244,13 +166,11 @@
                 this.speedX = (Math.random() - 0.5) * 0.4;
                 this.opacity = 0.6 + Math.random() * 0.4;
             }
-
             update() {
                 this.y += this.speedY;
                 this.x += this.speedX;
                 if (this.y > canvas.height) this.reset();
             }
-
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
@@ -261,17 +181,69 @@
             }
         }
 
-        const particles = [];
-        const snowflakes = [];
-        for (let i = 0; i < 1200; i++) particles.push(new Particle()); // 大幅增加粒子数，填满区域
-        for (let i = 0; i < 80; i++) snowflakes.push(new Snowflake());
+        // 生成文字粒子（直接计算文字位置，避免离屏画布问题）
+        function generateTextParticles() {
+            textParticles = [];
+            ctx.font = `bold 60px "Microsoft YaHei", sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            
+            // 计算文字每个字符的位置
+            const textWidth = ctx.measureText(text).width;
+            const charWidth = textWidth / text.length;
+            const startX = canvas.width / 2 - textWidth / 2;
 
+            // 为每个字符生成粒子
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const charX = startX + i * charWidth + charWidth / 2;
+                const charY = canvas.height / 2;
+                
+                // 每个字符生成100个粒子（填充文字区域）
+                for (let j = 0; j < 100; j++) {
+                    const offsetX = (Math.random() - 0.5) * charWidth * 0.8;
+                    const offsetY = (Math.random() - 0.5) * 60 * 0.8;
+                    textParticles.push(new TextParticle(charX + offsetX, charY + offsetY));
+                }
+            }
+        }
+
+        // 初始化元素
+        const treeParticles = Array(1200).fill().map(() => new TreeParticle());
+        const snowflakes = Array(80).fill().map(() => new Snowflake());
+
+        // 点击按钮触发文字特效
+        btn.addEventListener('click', () => {
+            if (!isTextActive) {
+                generateTextParticles();
+                isTextActive = true;
+            }
+        });
+
+        // 绘制星星
+        function drawStar(x, y, outerR, innerR, points) {
+            ctx.beginPath();
+            const angle = Math.PI / points;
+            for (let i = 0; i < 2 * points; i++) {
+                const r = i % 2 === 0 ? outerR : innerR;
+                const px = x + Math.cos(i * angle) * r;
+                const py = y + Math.sin(i * angle) * r;
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fillStyle = "rgba(255, 215, 0, 0.95)";
+            ctx.fill();
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
+        }
+
+        // 动画循环
         function animate() {
             ctx.fillStyle = "rgba(10, 16, 41, 0.2)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
             // 绘制圣诞树粒子
-            particles.forEach(p => {
+            treeParticles.forEach(p => {
                 p.update();
                 p.draw();
             });
@@ -283,47 +255,22 @@
             });
 
             // 绘制文字粒子
-            if (isTextShowing && textParticles.length > 0) {
+            if (isTextActive) {
                 textParticles.forEach(p => {
                     p.update();
                     p.draw();
                 });
             }
 
-            // 树顶星星
-            const starX = canvas.width / 2;
-            const starY = canvas.height / 2 - 180;
-            drawStar(starX, starY, 18, 10, 5);
-            ctx.fillStyle = "rgba(255, 215, 0, 0.95)";
-            ctx.fill();
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
-
-            // 圣诞树底座
-            const baseX = canvas.width / 2;
-            const baseY = starY + 300;
+            // 绘制树顶星星和底座
+            drawStar(canvas.width / 2, canvas.height / 2 - 180, 18, 10, 5);
             ctx.beginPath();
-            ctx.rect(baseX - 35, baseY, 70, 35);
+            ctx.rect(canvas.width/2 -35, canvas.height/2 +120, 70, 35);
             ctx.fillStyle = "rgba(139, 69, 19, 0.9)";
             ctx.fill();
-            ctx.shadowBlur = 8;
-            ctx.shadowColor = "rgba(139, 69, 19, 0.7)";
 
             requestAnimationFrame(animate);
         }
-
-        function drawStar(x, y, outerRadius, innerRadius, points) {
-            ctx.beginPath();
-            const angle = Math.PI / points;
-            for (let i = 0; i < 2 * points; i++) {
-                const radius = i % 2 === 0 ? outerRadius : innerRadius;
-                const px = x + Math.cos(i * angle) * radius;
-                const py = y + Math.sin(i * angle) * radius;
-                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-            }
-            ctx.closePath();
-        }
-
         animate();
     </script>
 </body>
