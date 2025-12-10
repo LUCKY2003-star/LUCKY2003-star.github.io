@@ -1,115 +1,632 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <!-- 适配移动端 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的HTML页面</title>
-    <!-- 基础样式 -->
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+    <title>Grand Luxury Interactive Christmas Tree</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@19.0.0-rc.0/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@19.0.0-rc.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/three@0.160.0/build/three.min.js"></script>
+    <script src="https://unpkg.com/@react-three/fiber@8.15.12/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@react-three/drei@9.88.14/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/@react-three/postprocessing@2.15.11/dist/umd/index.min.js"></script>
+    <script src="https://unpkg.com/leapjs@1.1.1/leap.min.js"></script>
+    <script src="https://unpkg.com/@mediapipe/hands@0.4.1646424915/hands.min.js"></script>
+    <script src="https://unpkg.com/@mediapipe/camera_utils@0.3.1646425220/camera_utils.min.js"></script>
+    <script src="https://unpkg.com/@mediapipe/drawing_utils@0.3.1646425220/drawing_utils.min.js"></script>
+    <script src="https://unpkg.com/typescript@5.3.3/lib/typescript.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        emerald: {
+                            deep: '#004d40',
+                            lux: '#00695c'
+                        },
+                        gold: {
+                            highlight: '#ffd700',
+                            dark: '#b8860b'
+                        }
+                    },
+                    fontFamily: {
+                        luxury: ['Garamond', 'serif']
+                    }
+                }
+            }
         }
-
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .glow {
+                filter: drop-shadow(0 0 8px theme('colors.gold.highlight'));
+            }
+            .tree-shadow {
+                box-shadow: 0 0 20px theme('colors.emerald.deep');
+            }
+        }
+        
         body {
-            font-family: "Microsoft YaHei", sans-serif;
-            line-height: 1.6;
-            color: #333;
-            background-color: #f5f5f5;
-            padding: 20px;
+            margin: 0;
+            overflow: hidden;
+            background: radial-gradient(ellipse at bottom, #0a1015 0%, #000 100%);
         }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
+        
+        canvas {
+            display: block;
+        }
+        
+        .polaroid {
+            position: absolute;
             background: white;
-            padding: 30px;
+            padding: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transform-origin: center;
+            border: 1px solid #ddd;
+        }
+        
+        .polaroid img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .polaroid-caption {
+            text-align: center;
+            padding: 8px 0;
+            font-family: 'Comic Sans MS', cursive;
+            font-size: 12px;
+        }
+        
+        #gesture-overlay {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.7);
+            color: #ffd700;
+            padding: 15px;
+            border-radius: 10px;
+            border: 2px solid #b8860b;
+            font-family: 'Garamond', serif;
+            z-index: 100;
+        }
+        
+        #camera-feed {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            width: 200px;
+            height: 150px;
+            border: 3px solid #ffd700;
             border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-
-        h1 {
-            color: #2c3e50;
-            margin-bottom: 20px;
-            border-bottom: 2px solid #3498db;
-            padding-bottom: 10px;
-        }
-
-        p {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-
-        .btn {
-            display: inline-block;
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-
-        .btn:hover {
-            background-color: #2980b9;
-        }
-
-        ul {
-            margin: 15px 0 15px 20px;
-        }
-
-        li {
-            margin-bottom: 8px;
-        }
-
-        /* 响应式适配 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 20px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
+            overflow: hidden;
+            z-index: 99;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>欢迎使用我的HTML页面</h1>
-        
-        <p>这是一个可以直接粘贴使用的完整HTML文件，包含以下特性：</p>
-        
-        <ul>
-            <li>中文编码适配（UTF-8）</li>
-            <li>移动端响应式布局</li>
-            <li>基础的样式美化</li>
-            <li>交互按钮样式</li>
-            <li>清晰的页面结构</li>
-        </ul>
-
-        <p>你可以根据自己的需求修改以下内容：</p>
-        <ul>
-            <li>页面标题（title标签）</li>
-            <li>文字内容和图片</li>
-            <li>颜色、字体等样式</li>
-            <li>按钮链接和功能</li>
-        </ul>
-
-        <button class="btn" onclick="alert('按钮点击成功！')">点击我试试</button>
+    <div id="root" class="w-full h-screen"></div>
+    <div id="gesture-overlay">
+        <h3 class="text-xl mb-2">🎄 Gesture Control</h3>
+        <p>Open hand: Unleash Chaos</p>
+        <p>Closed hand: Form Tree</p>
+        <p>Move hand: Adjust View</p>
+        <div id="gesture-status" class="mt-4 text-gold-highlight">Status: Detecting...</div>
     </div>
+    <div id="camera-feed"></div>
 
-    <!-- 可选：添加JavaScript脚本 -->
-    <script>
-        // 页面加载完成后执行
-        window.onload = function() {
-            console.log("页面加载完成！");
+    <script type="text/babel" data-type="module">
+        // TypeScript类型定义
+        const { useState, useRef, useEffect, useMemo } = React;
+        const { Canvas, useFrame, useThree, extend } = ReactThreeFiber;
+        const { OrbitControls, Environment, InstancedMesh, Points, PointMaterial, useGLTF, useTexture } = ReactThreeDrei;
+        const { EffectComposer, Bloom, Noise, Vignette } = ReactThreePostprocessing;
+
+        // 状态类型定义
+        const TreeState = {
+            CHAOS: 'CHAOS',
+            FORMED: 'FORMED'
         };
+
+        // 坐标接口
+        class Vector3 extends THREE.Vector3 {}
+        class Color extends THREE.Color {}
+
+        // 主应用组件
+        const App = () => {
+            const [treeState, setTreeState] = useState(TreeState.FORMED);
+            const [progress, setProgress] = useState(0);
+            const [handPosition, setHandPosition] = useState({ x: 0, y: 0 });
+            const cameraRef = useRef(null);
+            const { camera } = useThree();
+            
+            // 初始化摄像机位置
+            useEffect(() => {
+                camera.position.set(0, 4, 20);
+                cameraRef.current = camera;
+            }, [camera]);
+
+            // 手势控制逻辑
+            useEffect(() => {
+                const videoElement = document.createElement('video');
+                document.getElementById('camera-feed').appendChild(videoElement);
+                
+                const hands = new window.mediapipe.hands.Hands({
+                    locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands@0.4.1646424915/${file}`
+                });
+
+                hands.setOptions({
+                    maxNumHands: 1,
+                    modelComplexity: 1,
+                    minDetectionConfidence: 0.7,
+                    minTrackingConfidence: 0.7
+                });
+
+                hands.onResults((results) => {
+                    const statusElement = document.getElementById('gesture-status');
+                    
+                    if (results.multiHandLandmarks) {
+                        const hand = results.multiHandLandmarks[0];
+                        const handType = results.multiHandedness[0].label;
+                        
+                        // 计算手指张开程度
+                        const thumbTip = hand[4];
+                        const indexTip = hand[8];
+                        const middleTip = hand[12];
+                        const ringTip = hand[16];
+                        const pinkyTip = hand[20];
+                        const palm = hand[0];
+                        
+                        // 计算手掌中心
+                        const palmX = (thumbTip.x + indexTip.x + middleTip.x + ringTip.x + pinkyTip.x) / 5;
+                        const palmY = (thumbTip.y + indexTip.y + middleTip.y + ringTip.y + pinkyTip.y) / 5;
+                        
+                        // 更新手部位置用于视角控制
+                        setHandPosition({
+                            x: (palmX - 0.5) * -10,
+                            y: (palmY - 0.5) * 10
+                        });
+                        
+                        // 计算手指张开度
+                        const thumbDistance = Math.hypot(thumbTip.x - palm.x, thumbTip.y - palm.y);
+                        const indexDistance = Math.hypot(indexTip.x - palm.x, indexTip.y - palm.y);
+                        const middleDistance = Math.hypot(middleTip.x - palm.x, middleTip.y - palm.y);
+                        const ringDistance = Math.hypot(ringTip.x - palm.x, ringTip.y - palm.y);
+                        const pinkyDistance = Math.hypot(pinkyTip.x - palm.x, pinkyTip.y - palm.y);
+                        
+                        const avgDistance = (thumbDistance + indexDistance + middleDistance + ringDistance + pinkyDistance) / 5;
+                        
+                        // 判断状态
+                        if (avgDistance > 0.15) {
+                            setTreeState(TreeState.CHAOS);
+                            setProgress(Math.min(1, progress + 0.02));
+                            statusElement.textContent = 'Status: Chaos Mode (Unleashed)';
+                        } else {
+                            setTreeState(TreeState.FORMED);
+                            setProgress(Math.max(0, progress - 0.02));
+                            statusElement.textContent = 'Status: Formed Mode (Tree)';
+                        }
+                    } else {
+                        statusElement.textContent = 'Status: No hand detected';
+                    }
+                });
+
+                const cameraUtils = new window.mediapipe.camera_utils.Camera(videoElement, {
+                    onFrame: async () => {
+                        await hands.send({ image: videoElement });
+                    },
+                    width: 200,
+                    height: 150
+                });
+
+                cameraUtils.start();
+
+                return () => {
+                    cameraUtils.stop();
+                    hands.close();
+                };
+            }, [progress]);
+
+            // 视角控制
+            useFrame((state) => {
+                if (cameraRef.current) {
+                    // 根据手部位置调整摄像机
+                    cameraRef.current.position.x += (handPosition.x - cameraRef.current.position.x) * 0.05;
+                    cameraRef.current.position.y += (4 + handPosition.y - cameraRef.current.position.y) * 0.05;
+                    cameraRef.current.lookAt(0, 2, 0);
+                }
+            });
+
+            return (
+                <Canvas shadows dpr={[1, 2]}>
+                    <color attach="background" args={['#000814']} />
+                    <fog attach="fog" args={['#001a1a', 10, 50]} />
+                    
+                    {/* 环境光和HDRI */}
+                    <Environment preset="lobby" />
+                    <ambientLight intensity={0.3} color="#004d40" />
+                    <directionalLight 
+                        position={[10, 10, 5]} 
+                        intensity={1.2} 
+                        color="#ffd700"
+                        castShadow
+                    />
+                    
+                    {/* 圣诞树核心组件 */}
+                    <ChristmasTree progress={progress} />
+                    
+                    {/* 后期处理 */}
+                    <EffectComposer>
+                        <Bloom 
+                            luminanceThreshold={0.8}
+                            luminanceSmoothing={0.05}
+                            intensity={1.2}
+                            radius={0.5}
+                        />
+                        <Noise opacity={0.02} />
+                        <Vignette eskil={false} offset={0.1} darkness={0.4} />
+                    </EffectComposer>
+                    
+                    {/* 控制器（备用） */}
+                    <OrbitControls 
+                        enablePan={false}
+                        enableZoom={true}
+                        maxPolarAngle={Math.PI / 2}
+                        minDistance={10}
+                        maxDistance={30}
+                    />
+                </Canvas>
+            );
+        };
+
+        // 圣诞树核心组件
+        const ChristmasTree = ({ progress }) => {
+            const foliageRef = useRef(null);
+            const ornamentsRef = useRef(null);
+            const polaroidsRef = useRef(null);
+            
+            // 配置参数
+            const FOLIAGE_COUNT = 50000;
+            const ORNAMENT_COUNT = 500;
+            const POLAROID_COUNT = 30;
+            
+            // 生成随机坐标
+            const generateChaosPosition = () => {
+                return new Vector3(
+                    (Math.random() - 0.5) * 40,
+                    (Math.random() - 0.5) * 30,
+                    (Math.random() - 0.5) * 40
+                );
+            };
+            
+            // 生成树形目标坐标（圆锥体）
+            const generateTargetPosition = (index) => {
+                const layer = Math.floor(index / (FOLIAGE_COUNT / 10));
+                const radius = 8 - (layer * 0.8);
+                const height = layer * 0.8;
+                
+                const angle = Math.random() * Math.PI * 2;
+                const r = Math.random() * radius;
+                
+                return new Vector3(
+                    Math.cos(angle) * r,
+                    height - 5,
+                    Math.sin(angle) * r
+                );
+            };
+            
+            // 初始化针叶粒子数据
+            const foliageData = useMemo(() => {
+                const positions = [];
+                const chaosPositions = [];
+                const targetPositions = [];
+                const colors = [];
+                
+                for (let i = 0; i < FOLIAGE_COUNT; i++) {
+                    const chaosPos = generateChaosPosition();
+                    const targetPos = generateTargetPosition(i);
+                    
+                    chaosPositions.push(chaosPos.x, chaosPos.y, chaosPos.z);
+                    targetPositions.push(targetPos.x, targetPos.y, targetPos.z);
+                    
+                    // 祖母绿渐变
+                    const greenShade = new Color(0x00695c);
+                    greenShade.offsetHSL(0, 0, Math.random() * 0.2 - 0.1);
+                    colors.push(greenShade.r, greenShade.g, greenShade.b);
+                    
+                    // 初始位置
+                    positions.push(targetPos.x, targetPos.y, targetPos.z);
+                }
+                
+                return {
+                    positions: new Float32Array(positions),
+                    chaosPositions: new Float32Array(chaosPositions),
+                    targetPositions: new Float32Array(targetPositions),
+                    colors: new Float32Array(colors)
+                };
+            }, []);
+            
+            // 初始化装饰物数据
+            const ornamentData = useMemo(() => {
+                const chaosPositions = [];
+                const targetPositions = [];
+                const types = []; // 0:礼物盒, 1:彩球, 2:灯光
+                const colors = [];
+                
+                for (let i = 0; i < ORNAMENT_COUNT; i++) {
+                    // 随机类型
+                    const type = Math.random() > 0.7 ? 0 : (Math.random() > 0.5 ? 1 : 2);
+                    types.push(type);
+                    
+                    // 坐标
+                    const chaosPos = generateChaosPosition();
+                    const layer = Math.floor(Math.random() * 10);
+                    const radius = 7 - (layer * 0.7);
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.random() * radius;
+                    
+                    const targetPos = new Vector3(
+                        Math.cos(angle) * r,
+                        layer * 0.8 - 4,
+                        Math.sin(angle) * r
+                    );
+                    
+                    chaosPositions.push(chaosPos.x, chaosPos.y, chaosPos.z);
+                    targetPositions.push(targetPos.x, targetPos.y, targetPos.z);
+                    
+                    // 颜色（金色/红色/绿色）
+                    let color;
+                    if (type === 0) color = new Color(Math.random() > 0.5 ? 0xffd700 : 0xb8860b); // 礼物盒（金色）
+                    if (type === 1) color = new Color(Math.random() > 0.5 ? 0xff0000 : 0x00695c); // 彩球（红/绿）
+                    if (type === 2) color = new Color(0xffd700); // 灯光（金色）
+                    
+                    colors.push(color.r, color.g, color.b);
+                }
+                
+                return {
+                    chaosPositions: new Float32Array(chaosPositions),
+                    targetPositions: new Float32Array(targetPositions),
+                    types: new Float32Array(types),
+                    colors: new Float32Array(colors)
+                };
+            }, []);
+            
+            // 初始化拍立得照片数据
+            const polaroidData = useMemo(() => {
+                const chaosPositions = [];
+                const targetPositions = [];
+                
+                for (let i = 0; i < POLAROID_COUNT; i++) {
+                    const chaosPos = generateChaosPosition();
+                    
+                    // 树形位置
+                    const layer = Math.floor(Math.random() * 8) + 1;
+                    const radius = 6 - (layer * 0.6);
+                    const angle = Math.random() * Math.PI * 2;
+                    const r = Math.random() * radius;
+                    
+                    const targetPos = new Vector3(
+                        Math.cos(angle) * r,
+                        layer * 0.8 - 3,
+                        Math.sin(angle) * r
+                    );
+                    
+                    chaosPositions.push(chaosPos.x, chaosPos.y, chaosPos.z);
+                    targetPositions.push(targetPos.x, targetPos.y, targetPos.z);
+                }
+                
+                return {
+                    chaosPositions: new Float32Array(chaosPositions),
+                    targetPositions: new Float32Array(targetPositions)
+                };
+            }, []);
+            
+            // 帧更新：插值动画
+            useFrame(() => {
+                // 更新针叶粒子
+                if (foliageRef.current) {
+                    const positions = foliageRef.current.geometry.attributes.position.array;
+                    const chaos = foliageData.chaosPositions;
+                    const target = foliageData.targetPositions;
+                    
+                    for (let i = 0; i < FOLIAGE_COUNT * 3; i += 3) {
+                        positions[i] = THREE.MathUtils.lerp(target[i], chaos[i], progress);
+                        positions[i + 1] = THREE.MathUtils.lerp(target[i + 1], chaos[i + 1], progress);
+                        positions[i + 2] = THREE.MathUtils.lerp(target[i + 2], chaos[i + 2], progress);
+                    }
+                    
+                    foliageRef.current.geometry.attributes.position.needsUpdate = true;
+                }
+                
+                // 更新装饰物和拍立得（简化版，完整实现需实例化网格）
+            });
+            
+            // 自定义针叶着色器材质
+            const foliageMaterial = useMemo(() => {
+                return new THREE.ShaderMaterial({
+                    uniforms: {
+                        color: { value: new Color(0x00695c) },
+                        size: { value: 0.15 },
+                        progress: { value: progress }
+                    },
+                    vertexShader: `
+                        attribute vec3 color;
+                        varying vec3 vColor;
+                        uniform float progress;
+                        
+                        void main() {
+                            vColor = color;
+                            vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
+                            gl_PointSize = 0.15 * (10.0 / -mvPosition.z);
+                            gl_Position = projectionMatrix * mvPosition;
+                        }
+                    `,
+                    fragmentShader: `
+                        varying vec3 vColor;
+                        uniform float progress;
+                        
+                        void main() {
+                            float distanceToCenter = length(gl_PointCoord - vec2(0.5));
+                            if (distanceToCenter > 0.5) discard;
+                            
+                            gl_FragColor = vec4(vColor * (1.0 - progress * 0.5), 1.0);
+                            gl_FragColor.rgb += vec3(0.1, 0.1, 0.0) * (1.0 - distanceToCenter * 2.0);
+                        }
+                    `,
+                    transparent: true,
+                    blending: THREE.AdditiveBlending
+                });
+            }, [progress]);
+            
+            // 创建针叶几何体
+            const foliageGeometry = useMemo(() => {
+                const geo = new THREE.BufferGeometry();
+                geo.setAttribute('position', new THREE.BufferAttribute(foliageData.positions, 3));
+                geo.setAttribute('color', new THREE.BufferAttribute(foliageData.colors, 3));
+                return geo;
+            }, [foliageData]);
+            
+            return (
+                <group>
+                    {/* 针叶粒子系统 */}
+                    <Points 
+                        ref={foliageRef}
+                        geometry={foliageGeometry}
+                        material={foliageMaterial}
+                    />
+                    
+                    {/* 树干 */}
+                    <mesh position={[0, -5, 0]}>
+                        <cylinderGeometry args={[1, 1.5, 4, 16]} />
+                        <meshStandardMaterial 
+                            color="#8B4513"
+                            roughness={0.8}
+                            metalness={0.2}
+                        />
+                    </mesh>
+                    
+                    {/* 装饰物和拍立得（简化展示） */}
+                    <group ref={ornamentsRef}>
+                        {Array.from({ length: 50 }).map((_, i) => {
+                            const chaosPos = new Vector3(
+                                polaroidData.chaosPositions[i * 3],
+                                polaroidData.chaosPositions[i * 3 + 1],
+                                polaroidData.chaosPositions[i * 3 + 2]
+                            );
+                            const targetPos = new Vector3(
+                                polaroidData.targetPositions[i * 3],
+                                polaroidData.targetPositions[i * 3 + 1],
+                                polaroidData.targetPositions[i * 3 + 2]
+                            );
+                            
+                            const pos = new Vector3().lerpVectors(targetPos, chaosPos, progress);
+                            
+                            // 拍立得模型
+                            return (
+                                <mesh 
+                                    key={`polaroid-${i}`}
+                                    position={[pos.x, pos.y, pos.z]}
+                                    rotation={[0, Math.random() * Math.PI * 2, 0]}
+                                >
+                                    <boxGeometry args={[0.8, 1, 0.1]} />
+                                    <meshStandardMaterial 
+                                        color="#ffffff"
+                                        roughness={0.9}
+                                        metalness={0.1}
+                                    />
+                                    <mesh position={[0, 0, 0.06]}>
+                                        <planeGeometry args={[0.6, 0.6]} />
+                                        <meshBasicMaterial 
+                                            color={Math.random() > 0.5 ? 0xffd700 : 0x00695c}
+                                            transparent
+                                            opacity={0.9}
+                                        />
+                                    </mesh>
+                                </mesh>
+                            );
+                        })}
+                        
+                        {/* 金色装饰球 */}
+                        {Array.from({ length: 100 }).map((_, i) => {
+                            const chaosPos = new Vector3(
+                                ornamentData.chaosPositions[i * 3],
+                                ornamentData.chaosPositions[i * 3 + 1],
+                                ornamentData.chaosPositions[i * 3 + 2]
+                            );
+                            const targetPos = new Vector3(
+                                ornamentData.targetPositions[i * 3],
+                                ornamentData.targetPositions[i * 3 + 1],
+                                ornamentData.targetPositions[i * 3 + 2]
+                            );
+                            
+                            const pos = new Vector3().lerpVectors(targetPos, chaosPos, progress);
+                            
+                            return (
+                                <mesh 
+                                    key={`ornament-${i}`}
+                                    position={[pos.x, pos.y, pos.z]}
+                                    castShadow
+                                    receiveShadow
+                                >
+                                    <sphereGeometry args={[0.2 + Math.random() * 0.3, 16, 16]} />
+                                    <meshStandardMaterial 
+                                        color={Math.random() > 0.5 ? 0xffd700 : 0xb8860b}
+                                        roughness={0.1}
+                                        metalness={0.9}
+                                    />
+                                </mesh>
+                            );
+                        })}
+                        
+                        {/* 灯光装饰 */}
+                        {Array.from({ length: 200 }).map((_, i) => {
+                            const chaosPos = new Vector3(
+                                ornamentData.chaosPositions[(i + 100) * 3],
+                                ornamentData.chaosPositions[(i + 100) * 3 + 1],
+                                ornamentData.chaosPositions[(i + 100) * 3 + 2]
+                            );
+                            const targetPos = new Vector3(
+                                ornamentData.targetPositions[(i + 100) * 3],
+                                ornamentData.targetPositions[(i + 100) * 3 + 1],
+                                ornamentData.targetPositions[(i + 100) * 3 + 2]
+                            );
+                            
+                            const pos = new Vector3().lerpVectors(targetPos, chaosPos, progress);
+                            
+                            return (
+                                <pointLight 
+                                    key={`light-${i}`}
+                                    position={[pos.x, pos.y, pos.z]}
+                                    color="#ffd700"
+                                    intensity={0.5}
+                                    distance={2}
+                                    decay={2}
+                                />
+                            );
+                        })}
+                    </group>
+                    
+                    {/* 树顶星 */}
+                    <mesh 
+                        position={[0, 3, 0]}
+                        scale={1 - progress * 0.8}
+                    >
+                        <octahedronGeometry args={[0.8, 0]} />
+                        <meshStandardMaterial 
+                            color="#ffd700"
+                            roughness={0.1}
+                            metalness={1.0}
+                            emissive="#ffd700"
+                            emissiveIntensity={1.5}
+                        />
+                    </mesh>
+                </group>
+            );
+        };
+
+        // 渲染应用
+        ReactDOM.createRoot(document.getElementById('root')).render(<App />);
     </script>
 </body>
 </html>
