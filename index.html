@@ -1,114 +1,78 @@
-import turtle as  t
-from turtle import *
-import random as r
-import  time
- 
-#定义几个函数先
- 
-#定义画彩灯的函数
-def drawlight():
-    if r.randint(0,30) == 0:
-        color('tomato')
-        circle(6)
-    elif r.randint(0,30) == 1:
-        color('orange')
-        circle(3)
-    else:
-        linewidth = 5
-        color('dark green')
- 
-#定义画圣诞树的函数
-def tree(d,s):
-    if d <= 0:  return
-    forward(s)
-    tree(d-1, s * .8)
-    right(120)
-    tree(d-3, s * .5)
-    drawlight()
-    right(120)
-    tree(d-3, s * .5)
-    right(120)
-    backward(s)
- 
-#定义树下面小装饰的函数
-def  xzs():
-    for i in range(200):
-        a = 200-400* r.random()
-        b = 10 -20* r.random()
-        up()
-        forward(b)
-        left(90)
-        forward(a)
-        down()
-        if  r.randint(0,1) == 0:
-            color('tomato')
-        else:
-            color('wheat')
-        circle(2)
-        up()
-        backward(a)
-        right(90)
-        backward(b)
- 
-#定义一个画雪花的函数
-def drawsnow():
-    t.hideturtle()
-    t.pensize(2)
-    for i in range(200):
-        t.pencolor("white")
-        t.penup()
-        t.setx(r.randint(-350,350))
-        t.sety(r.randint(-100,350))
-        t.pendown()
-        dens = 6
-        snowsize = r.randint(1,10)
-        for j in range(dens):
-            t.forward(int(snowsize))
-            t.backward(int(snowsize))
-            t.right(int(360/dens))
- 
- 
-n=100.0
-t.pensize(10)
-speed("fastest")
-t.screensize(800,600, "black")
-left(90)
-forward(3 * n)
-color("orange", "yellow")
-begin_fill()
-left(126)
- 
- 
-#画五角星
-for i in range(5):
-    forward(n/5)
-    right(144)
-    forward(n/5)
-    left(72)
- 
-end_fill()
-right(126)
- 
-color("dark green")
-backward(n * 4.8)
- 
- 
-#调用画树的函数
-tree(15 , n)
-backward(n/2)
- 
-xzs()
- 
-#写文字
-t.color("dark red", "red")
-t.write("Merry Christmas", align="center", font=("Comic Sans MS", 40, "bold"))
- 
- 
- 
-# 调用雪花函数
-drawsnow()
- 
-t.done()    #收笔
-————————————————
-版权声明：本文为CSDN博主「网络豆」的原创文章，遵循CC 4.0 BY-SA版权协议，转载请附上原文出处链接及本声明。
-原文链接：https://blog.csdn.net/yj11290301/article/details/128239545
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<title>AE-圣诞树</title>
+		<style>
+			html,
+			body {
+				margin: 0;
+				width: 100%;
+				height: 100%;
+			}
+
+			#main {
+				position: fixed;
+				top: 0;
+				left: 0;
+			}
+
+			#video1 {
+				width: 100%;
+				height: 100%;
+			}
+
+			.hidden {
+				display: none;
+			}
+		</style>
+
+	</head>
+
+	<body id="app">
+			<div id="main">
+			<video id="video1" muted="muted" autoplay="autoplay" loop="loop" src="./video/lanse.mp4">
+			</video>
+			<audio id="music1" autostart="true" loop="loop" preload="auto" controls hidden="true">
+				<source src="./music/jinniandongtianpeizhewoba.mp3"></source>
+			</audio>
+
+		</div>
+
+
+	</body>
+	<script type="text/javascript">
+		var video = document.getElementById("video1");
+		video.playbackRate *= 0.8;
+		video.play();
+		$(function() {
+			// var video = document.getElementById("video1");
+			// video.src = "";
+			// video.play();
+
+			// var music = document.getElementById("music1");
+			// music.src = "";
+			// music.play();
+		});
+	</script>
+	<script>
+		var myAuto = document.getElementById('music1');
+		var app = document.getElementById("app");
+		// 监听事件
+		app.addEventListener("mousemove", function() {
+			console.log("played");
+			myAuto.play();
+		}, true);
+
+		// 用定时器触发事件
+		setInterval(function() {
+			if ("createEvent" in document) {
+				var evt = document.createEvent("HTMLEvents");
+				evt.initEvent("mousemove", false, true);
+				app.dispatchEvent(evt);
+			} else{
+				app.fireEvent("onmousemove");
+			}
+		}, 1000);
+	</script>
+</html>
