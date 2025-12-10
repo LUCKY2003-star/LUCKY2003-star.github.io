@@ -109,7 +109,7 @@
             lerp(a, b, t) { return a + (b - a) * t; }
         }
 
-        // 文字粒子类（高清晰度优化）
+        // 文字粒子类（高清晰度优化 + 放慢5倍速度）
         class TextParticle {
             constructor(targetX, targetY) {
                 // 初始位置从屏幕边缘飞入
@@ -123,7 +123,8 @@
                 this.targetY = targetY;
                 this.color = textColor;
                 this.size = 2.5; // 固定粒子大小，提升文字均匀度
-                this.speed = 0.008 + Math.random() * 0.005;
+                // 速度放慢5倍：原速度 / 5
+                this.speed = (0.008 + Math.random() * 0.005) / 5; 
                 this.progress = 0;
             }
             update() {
@@ -173,15 +174,15 @@
             }
         }
 
-        // 生成高清晰文字粒子
+        // 生成高清晰文字粒子（文字位置更靠下）
         function generateTextParticles() {
             textParticles = [];
             ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`; // 用更清晰的中文字体
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
-            // 计算文字位置（放在圣诞树下方，避免遮挡）
-            const textY = canvas.height / 2 + 150;
+            // 文字位置再往下调整（从+150改为+220）
+            const textY = canvas.height / 2 + 220;
 
             // 为文字每个像素区域生成足够粒子，保证清晰度
             const tempCanvas = document.createElement('canvas');
