@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>3D圣诞粒子树</title>
+    <title>圣诞粒子树（还原树形）</title>
     <style>
         * { margin: 0; padding: 0; }
         body { 
@@ -44,53 +44,46 @@
             canvas.height = window.innerHeight;
         }
 
-        // 3D粒子类（增加深度、缩放、位移）
+        // 粒子类（恢复三层圣诞树结构）
         class Particle {
             constructor() {
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 const centerX = canvas.width / 2;
-                const starY = canvas.height / 2 - 200; // 星星Y坐标
-                const totalTreeHeight = 320; // 圣诞树总高度
-                // 增加深度层级（0=前层 1=中层 2=后层）
-                this.layer = Math.floor(Math.random() * 3); 
-                // 增加Z轴深度（控制缩放和位移）
-                this.z = 1 + this.layer * 0.5; 
-                const layerHeight = totalTreeHeight / 3 / this.z; // 按深度缩放高度
+                const starY = canvas.height / 2 - 180; // 星星位置上移，更像树顶
+                const totalTreeHeight = 300; // 圣诞树总高度（三层）
+                this.layer = Math.floor(Math.random() * 3); // 0=顶层 1=中层 2=底层（严格三层）
+                const layerHeight = totalTreeHeight / 3; // 每层高度固定
 
-                // 顶层（尖点朝上，3D位移）
+                // 顶层（小三角形，树尖）
                 if (this.layer === 0) {
-                    const layerWidth = 80 * this.z; // 按深度缩放宽度
-                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth + (this.layer - 1) * 15; // 层位移
-                    const minY = starY;
-                    const maxY = starY + layerHeight;
-                    const slope = layerHeight / (layerWidth/2);
-                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    const layerWidth = 80; // 顶层宽度小
+                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
+                    // 严格三角形：离中心越远，Y越靠下
+                    this.targetY = starY + Math.abs(this.targetX - centerX) * (layerHeight / (layerWidth/2));
                 }
-                // 中层（尖点朝上，3D位移）
+                // 中层（中等三角形）
                 else if (this.layer === 1) {
-                    const layerWidth = 140 * this.z;
-                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth + (this.layer - 1) * 15;
-                    const minY = starY + layerHeight * 1.2;
-                    const maxY = starY + layerHeight * 2.2;
-                    const slope = layerHeight / (layerWidth/2);
-                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    const layerWidth = 150; // 中层宽度更大
+                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
+                    this.targetY = starY + layerHeight + Math.abs(this.targetX - centerX) * (layerHeight / (layerWidth/2));
                 }
-                // 底层（尖点朝上，3D位移）
+                // 底层（大三角形，树底）
                 else {
-                    const layerWidth = 200 * this.z;
-                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth + (this.layer - 1) * 15;
-                    const minY = starY + layerHeight * 2.4;
-                    const maxY = starY + layerHeight * 3.4;
-                    const slope = layerHeight / (layerWidth/2);
-                    this.targetY = maxY - Math.random() * (maxY - minY) * (1 - Math.abs(this.targetX - centerX)/(layerWidth/2));
+                    const layerWidth = 220; // 底层宽度最大
+                    this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
+                    this.targetY = starY + layerHeight * 2 + Math.abs(this.targetX - centerX) * (layerHeight / (layerWidth/2));
                 }
 
-                // 按深度缩放粒子大小（前层更大）
-                this.size = (2 + Math.random() * 3) / this.z; 
-                // 按深度调整透明度（后层更暗）
-                this.color = `rgba(255, 105, 180, ${(0.7 + Math.random() * 0.3) / this.z})`; 
-                this.speed = 0.003 + Math.random() * 0.005;
+                // 圣诞色调（红绿+粉）
+                const colors = [
+                    `rgba(255, 105, 180, ${0.8 + Math.random() * 0.2})`, // 粉
+                    `rgba(34, 139, 34, ${0.8 + Math.random() * 0.2})`,  // 绿
+                    `rgba(255, 69, 0, ${0.8 + Math.random() * 0.2})`    // 红
+                ];
+                this.color = colors[Math.floor(Math.random() * colors.length)];
+                this.size = 2 + Math.random() * 2.5; // 粒子更小更紧凑
+                this.speed = 0.004 + Math.random() * 0.006;
                 this.progress = 0;
             }
 
@@ -106,9 +99,8 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fillStyle = this.color;
                 ctx.fill();
-                // 按深度调整阴影（前层阴影更强）
-                ctx.shadowBlur = 10 / this.z;
-                ctx.shadowColor = "rgba(255, 105, 180, 0.8)";
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = this.color.replace(/[^,]+(?=\))/, '0.7');
             }
 
             lerp(a, b, t) {
@@ -124,10 +116,10 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = -Math.random() * 50;
-                this.size = 2 + Math.random() * 4;
-                this.speedY = 1 + Math.random() * 2;
-                this.speedX = (Math.random() - 0.5) * 0.5;
-                this.opacity = 0.5 + Math.random() * 0.5;
+                this.size = 1.5 + Math.random() * 3;
+                this.speedY = 0.8 + Math.random() * 1.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.opacity = 0.6 + Math.random() * 0.4;
             }
 
             update() {
@@ -141,22 +133,20 @@
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
                 ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
                 ctx.fill();
-                ctx.shadowBlur = 5;
+                ctx.shadowBlur = 4;
                 ctx.shadowColor = "rgba(255, 255, 255, 0.5)";
             }
         }
 
         const particles = [];
         const snowflakes = [];
-        for (let i = 0; i < 800; i++) particles.push(new Particle()); // 增加粒子数增强3D密度
+        for (let i = 0; i < 700; i++) particles.push(new Particle()); // 粒子数适配三层结构
         for (let i = 0; i < 80; i++) snowflakes.push(new Snowflake());
 
         function animate() {
             ctx.fillStyle = "rgba(10, 16, 41, 0.2)";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // 按深度排序（后层先画，前层覆盖）
-            particles.sort((a, b) => b.z - a.z); 
             particles.forEach(p => {
                 p.update();
                 p.draw();
@@ -167,30 +157,24 @@
                 s.draw();
             });
 
-            // 3D星星（增加立体阴影）
+            // 树顶星星（居中树尖）
             const starX = canvas.width / 2;
-            const starY = canvas.height / 2 - 200;
-            drawStar(starX, starY, 20, 12, 5);
-            ctx.fillStyle = "rgba(255, 215, 0, 0.9)";
+            const starY = canvas.height / 2 - 180;
+            drawStar(starX, starY, 18, 10, 5);
+            ctx.fillStyle = "rgba(255, 215, 0, 0.95)";
             ctx.fill();
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 15;
             ctx.shadowColor = "rgba(255, 215, 0, 0.9)";
 
-            // 3D底座（分层绘制增强立体）
+            // 圣诞树底座（树底正下方）
             const baseX = canvas.width / 2;
-            const baseY = starY + 320;
-            // 底座阴影层
+            const baseY = starY + 300;
             ctx.beginPath();
-            ctx.rect(baseX - 32, baseY + 2, 64, 40);
-            ctx.fillStyle = "rgba(100, 50, 10, 0.7)";
-            ctx.fill();
-            // 底座主体层
-            ctx.beginPath();
-            ctx.rect(baseX - 30, baseY, 60, 40);
+            ctx.rect(baseX - 35, baseY, 70, 35);
             ctx.fillStyle = "rgba(139, 69, 19, 0.9)";
             ctx.fill();
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = "rgba(139, 69, 19, 0.8)";
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = "rgba(139, 69, 19, 0.7)";
 
             requestAnimationFrame(animate);
         }
