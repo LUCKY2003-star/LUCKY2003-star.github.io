@@ -2,77 +2,55 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>AE-圣诞树</title>
+    <title>圣诞视频特效</title>
     <style>
-        html,
-        body {
+        /* 全屏视频特效样式：覆盖整个页面，无黑边，自动循环播放 */
+        * {
             margin: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
+            padding: 0;
+            box-sizing: border-box;
         }
-
-        #main {
-            position: fixed;
+        body {
+            overflow: hidden; /* 隐藏滚动条 */
+        }
+        .video-container {
+            position: fixed; /* 固定全屏 */
             top: 0;
             left: 0;
             width: 100vw;
             height: 100vh;
+            z-index: -1; /* 视频在底层，不遮挡其他内容 */
         }
-
-        #video1 {
+        video {
             width: 100%;
             height: 100%;
-            object-fit: cover; /* 保证视频铺满屏幕且不变形 */
+            object-fit: cover; /* 全屏无黑边 */
         }
-
-        /* 音频控件可选显示，方便调试 */
-        #music1 {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            opacity: 0.3;
-            z-index: 999;
-        }
-        #music1:hover {
-            opacity: 1;
+        /* 可选：添加文字/装饰在视频上方 */
+        .content {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            top: 50%;
+            transform: translateY(-50%);
+            color: white;
+            font-size: 30px;
+            text-shadow: 0 0 10px #ff0000;
         }
     </style>
 </head>
-
-<body id="app">
-    <div id="main">
-        <!-- 注意：替换成你GitHub仓库中音视频的RAW地址 -->
-        <video id="video1" muted autoplay loop>
-            <source src="https://raw.githubusercontent.com/你的用户名/仓库名/main/video/lanse.mp4" type="video/mp4">
+<body>
+    <!-- 视频容器：核心特效视频 -->
+    <div class="video-container">
+        <video autoplay loop muted playsinline>
+            <source src="christmas-effect.mp4" type="video/mp4">
+            你的浏览器不支持视频播放
         </video>
-        <audio id="music1" loop preload="auto" controls>
-            <source src="https://raw.githubusercontent.com/你的用户名/仓库名/main/music/jinniandongtianpeizhewoba.mp3" type="audio/mpeg">
-        </audio>
     </div>
 
-    <script>
-        // 1. 修复视频播放速度
-        const video = document.getElementById("video1");
-        video.playbackRate = 0.8; // 简化写法，避免 *= 初始值问题
-
-        // 2. 兼容的音频播放触发（必须用户真实交互）
-        const app = document.getElementById("app");
-        const music = document.getElementById("music1");
-        
-        // 监听用户真实点击/触摸事件（模拟事件会被浏览器拦截）
-        const playMusic = () => {
-            music.play().catch(err => {
-                console.log("音频播放需要用户手动点击控件:", err);
-            });
-            // 只触发一次，移除监听
-            app.removeEventListener("click", playMusic);
-            app.removeEventListener("touchstart", playMusic);
-        };
-        app.addEventListener("click", playMusic);
-        app.addEventListener("touchstart", playMusic);
-
-        // 3. 移除无效的jQuery和IE兼容代码
-    </script>
+    <!-- 可选：视频上方的文字（可删除/修改） -->
+    <div class="content">
+        圣诞快乐 🎄
+    </div>
 </body>
 </html>
