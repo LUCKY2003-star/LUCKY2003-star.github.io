@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>圣诞粒子树-音乐特效版</title>
+    <title>圣诞粒子树-手机适配版</title>
     <style>
         * { margin: 0; padding: 0; }
         body { 
@@ -16,10 +16,10 @@
             top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            padding: 10px 25px;
+            padding: 8px 20px;
             background: linear-gradient(to right, #FFD700, #FFEA80);
             color: #1a2a6c;
-            font-size: 20px;
+            font-size: 16px;
             font-weight: bold;
             border: none;
             border-radius: 8px;
@@ -32,95 +32,45 @@
             box-shadow: 0 0 25px #FFD700;
             transform: translateX(-50%) scale(1.05);
         }
-        /* 音频控制按钮 */
-        .audio-control {
-            position: absolute;
-            bottom: 20px;
-            right: 20px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background: rgba(255, 215, 0, 0.8);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 0 10px #FFD700;
-            z-index: 10;
-        }
-        .audio-control svg {
-            width: 24px;
-            height: 24px;
-            fill: #1a2a6c;
-        }
     </style>
 </head>
 <body>
     <canvas id="canvas"></canvas>
     <button class="btn">圣诞节快乐</button>
-    <!-- 音频控制按钮 -->
-    <div class="audio-control" id="audioControl">
-        <svg viewBox="0 0 24 24">
-            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-        </svg>
-    </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const btn = document.querySelector('.btn');
-        const audioControl = document.getElementById('audioControl');
         let clickCount = 0; // 点击次数计数器
         let isTextActive = false;
         let isHeartActive = false;
-        let isAudioPlaying = false;
         let textParticles = [];
         let heartParticles = [];
         const text = "孙思诺我喜欢你";
         const textColor = "rgba(255, 105, 180, 1)"; // 不透明粉红色，提升清晰度
-        const fontSize = 70; // 增大字体
-
-        // ========== 音频系统 ==========
-        // 创建音频上下文
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const audioCtx = new AudioContext();
         
-        // 背景音乐（圣诞轻快音乐）
-        const bgMusic = new Audio('https://assets.mixkit.co/music/preview/mixkit-jingle-bells-christmas-song-for-kids-1230.mp3');
-        bgMusic.loop = true;
-        bgMusic.volume = 0.5;
-        
-        // 点击音效
-        const clickSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-soft-hit-bell-216.mp3');
-        clickSound.volume = 0.7;
-        
-        const heartSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-love-hearts-1300.mp3');
-        heartSound.volume = 0.8;
-        
-        // 音频控制函数
-        function toggleAudio() {
-            if (isAudioPlaying) {
-                bgMusic.pause();
-                audioControl.innerHTML = `<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>`;
-            } else {
-                // 恢复音频上下文（解决浏览器自动播放限制）
-                if (audioCtx.state === 'suspended') {
-                    audioCtx.resume();
-                }
-                bgMusic.play().catch(err => {
-                    console.log('需要用户交互才能播放音频:', err);
-                    // 提示用户点击页面以启用音频
-                    alert('请点击页面任意位置以启用音频效果');
-                });
-                audioControl.innerHTML = `<svg viewBox="0 0 24 24"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.86-.36 3.51-1.36 4.77-2.64l1.41-1.41C18.69 15.15 19 13.66 19 12c0-2.64-1.05-5.07-2.75-6.91l-1.94-1.94C13.79 2.08 10.15 2 7 2c-2.4 0-4.6.85-6.32 2.25L4.27 3zM7 13c-1.66 0-3-1.34-3-3s1.34-3 3-3 3 1.34 3 3-1.34 3-3 3z"/></svg>`;
-            }
-            isAudioPlaying = !isAudioPlaying;
+        // 根据屏幕宽度动态设置字体大小
+        let fontSize;
+        function setResponsiveFontSize() {
+            const screenWidth = window.innerWidth;
+            // 手机端（宽度<768）用40号字体，平板/电脑用50号
+            fontSize = screenWidth < 768 ? 40 : 50;
         }
 
         // 初始化画布
         function initCanvas() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
+            setResponsiveFontSize(); // 每次调整画布都重新设置字体大小
+            
+            // 重新生成粒子（如果已激活）
+            if (isTextActive) {
+                generateTextParticles();
+            }
+            if (isHeartActive) {
+                generateHeartParticles();
+            }
         }
         initCanvas();
         window.addEventListener('resize', initCanvas);
@@ -131,19 +81,19 @@
                 this.x = Math.random() * canvas.width;
                 this.y = Math.random() * canvas.height;
                 const centerX = canvas.width / 2;
-                const starY = canvas.height / 2 - 200; // 上移圣诞树，避免遮挡文字
-                const totalTreeHeight = 280;
+                const starY = canvas.height / 2 - 150; // 上移圣诞树，适配手机
+                const totalTreeHeight = 220; // 缩小圣诞树高度
                 this.layer = Math.floor(Math.random() * 3);
                 const layerHeight = totalTreeHeight / 3;
                 const layerYStart = starY + this.layer * layerHeight;
 
                 let layerWidth, maxXOffset, minY, maxY;
                 if (this.layer === 0) {
-                    layerWidth = 80; maxXOffset = 40; minY = layerYStart; maxY = layerYStart + layerHeight;
+                    layerWidth = 60; maxXOffset = 30; minY = layerYStart; maxY = layerYStart + layerHeight;
                 } else if (this.layer === 1) {
-                    layerWidth = 150; maxXOffset = 75; minY = layerYStart; maxY = layerYStart + layerHeight;
+                    layerWidth = 100; maxXOffset = 50; minY = layerYStart; maxY = layerYStart + layerHeight;
                 } else {
-                    layerWidth = 220; maxXOffset = 110; minY = layerYStart; maxY = layerYStart + layerHeight;
+                    layerWidth = 150; maxXOffset = 75; minY = layerYStart; maxY = layerYStart + layerHeight;
                 }
 
                 this.targetX = centerX + (Math.random() - 0.5) * layerWidth;
@@ -157,7 +107,7 @@
                 else if (colorProb < 0.85) this.color = `rgba(255, 105, 180, ${0.8 + Math.random() * 0.2})`;
                 else this.color = `rgba(255, 69, 0, ${0.8 + Math.random() * 0.2})`;
                 
-                this.size = 2 + Math.random() * 2;
+                this.size = 1.5 + Math.random() * 1.5; // 缩小粒子尺寸
                 this.speed = 0.004 + Math.random() * 0.006;
                 this.progress = 0;
             }
@@ -178,7 +128,7 @@
             lerp(a, b, t) { return a + (b - a) * t; }
         }
 
-        // 文字粒子类（高清晰度优化 + 放慢5倍速度）
+        // 文字粒子类（适配手机尺寸）
         class TextParticle {
             constructor(targetX, targetY) {
                 // 初始位置从屏幕边缘飞入
@@ -191,7 +141,7 @@
                 this.targetX = targetX;
                 this.targetY = targetY;
                 this.color = textColor;
-                this.size = 2.5; // 固定粒子大小，提升文字均匀度
+                this.size = 2; // 缩小文字粒子尺寸
                 // 速度放慢5倍：原速度 / 5
                 this.speed = (0.008 + Math.random() * 0.005) / 5; 
                 this.progress = 0;
@@ -215,15 +165,15 @@
             easeOutCubic(t) { return 1 - Math.pow(1 - t, 3); }
         }
 
-        // 心形粒子类（颜色渐变效果）
+        // 心形粒子类（适配手机尺寸）
         class HeartParticle {
             constructor() {
                 this.centerX = canvas.width / 2;
-                this.centerY = canvas.height / 2 + 20; // 心形中心位置（圣诞树和文字中间）
-                this.radius = 120 + Math.random() * 80; // 心形轨道半径
+                this.centerY = canvas.height / 2 + 10; // 调整心形中心
+                this.radius = 80 + Math.random() * 50; // 缩小心形半径适配手机
                 this.angle = Math.random() * Math.PI * 2; // 初始角度
                 this.speed = 0.008 + Math.random() * 0.005; // 旋转速度
-                this.size = 2 + Math.random() * 2;
+                this.size = 1.5 + Math.random() * 1.5; // 缩小心形粒子
                 this.pulse = Math.random() * Math.PI; // 心跳脉动效果
                 // 颜色渐变相关
                 this.hueOffset = Math.random() * 360; // 每个粒子不同的初始色相
@@ -275,9 +225,9 @@
             reset() {
                 this.x = Math.random() * canvas.width;
                 this.y = -Math.random() * 50;
-                this.size = 1.5 + Math.random() * 3;
-                this.speedY = 0.8 + Math.random() * 1.5;
-                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.size = 1 + Math.random() * 2; // 缩小雪花尺寸
+                this.speedY = 0.6 + Math.random() * 1.2; // 放慢雪花速度
+                this.speedX = (Math.random() - 0.5) * 0.3;
                 this.opacity = 0.6 + Math.random() * 0.4;
             }
             update() {
@@ -295,15 +245,15 @@
             }
         }
 
-        // 生成高清晰文字粒子（文字位置更靠下）
+        // 生成高清晰文字粒子（适配手机）
         function generateTextParticles() {
             textParticles = [];
-            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`; // 用更清晰的中文字体
+            ctx.font = `bold ${fontSize}px "PingFang SC", "Microsoft YaHei", sans-serif`; // 响应式字体
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             
-            // 文字位置再往下调整（从+150改为+220）
-            const textY = canvas.height / 2 + 220;
+            // 文字位置调整，适配手机屏幕
+            const textY = canvas.height / 2 + 150; // 上移文字，避免超出屏幕
 
             // 为文字每个像素区域生成足够粒子，保证清晰度
             const tempCanvas = document.createElement('canvas');
@@ -316,11 +266,13 @@
             tempCtx.fillStyle = 'white';
             tempCtx.fillText(text, canvas.width / 2, textY);
             
-            // 读取文字像素，高密度生成粒子
+            // 读取文字像素，适配手机密度
             const imageData = tempCtx.getImageData(0, 0, canvas.width, canvas.height);
             const pixels = imageData.data;
-            for (let y = 0; y < canvas.height; y += 3) { // 缩小采样间隔，增加粒子密度
-                for (let x = 0; x < canvas.width; x += 3) {
+            // 手机端增大采样间隔，减少粒子数量
+            const step = window.innerWidth < 768 ? 4 : 3;
+            for (let y = 0; y < canvas.height; y += step) {
+                for (let x = 0; x < canvas.width; x += step) {
                     const index = (y * canvas.width + x) * 4;
                     if (pixels[index + 3] > 128) { // 只在文字区域生成粒子
                         textParticles.push(new TextParticle(x, y));
@@ -332,38 +284,33 @@
         // 生成心形粒子
         function generateHeartParticles() {
             heartParticles = [];
-            // 生成80个心形粒子，围绕圣诞树和文字
-            for (let i = 0; i < 80; i++) {
+            // 手机端减少心形粒子数量
+            const heartCount = window.innerWidth < 768 ? 60 : 80;
+            for (let i = 0; i < heartCount; i++) {
                 heartParticles.push(new HeartParticle());
             }
             isHeartActive = true;
         }
 
         // 初始化元素
-        const treeParticles = Array(1200).fill().map(() => new TreeParticle());
-        const snowflakes = Array(80).fill().map(() => new Snowflake());
+        // 手机端减少圣诞树粒子数量
+        const treeParticleCount = window.innerWidth < 768 ? 800 : 1200;
+        const treeParticles = Array(treeParticleCount).fill().map(() => new TreeParticle());
+        // 手机端减少雪花数量
+        const snowCount = window.innerWidth < 768 ? 60 : 80;
+        const snowflakes = Array(snowCount).fill().map(() => new Snowflake());
 
         // 点击按钮触发不同特效
         btn.addEventListener('click', () => {
-            // 播放点击音效
-            clickSound.currentTime = 0;
-            clickSound.play();
-            
             clickCount++;
             // 第一次点击：显示文字粒子
             if (clickCount === 1 && !isTextActive) {
                 generateTextParticles();
                 isTextActive = true;
-                // 启动音频（如果还没启动）
-                if (!isAudioPlaying) {
-                    toggleAudio();
-                }
             }
-            // 第二次点击：显示心形粒子 + 播放爱心音效
+            // 第二次点击：显示心形粒子
             else if (clickCount === 2 && !isHeartActive) {
                 generateHeartParticles();
-                heartSound.currentTime = 0;
-                heartSound.play();
                 // 按钮文字变化
                 btn.textContent = "圣诞快乐 ❤️";
             }
@@ -378,17 +325,7 @@
             }
         });
 
-        // 音频控制按钮点击事件
-        audioControl.addEventListener('click', toggleAudio);
-        
-        // 页面点击启用音频（解决浏览器自动播放限制）
-        document.addEventListener('click', () => {
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-        }, { once: true });
-
-        // 绘制星星
+        // 绘制星星（缩小尺寸适配手机）
         function drawStar(x, y, outerR, innerR, points) {
             ctx.beginPath();
             const angle = Math.PI / points;
@@ -438,10 +375,14 @@
                 });
             }
 
-            // 绘制树顶星星和底座
-            drawStar(canvas.width / 2, canvas.height / 2 - 200, 18, 10, 5);
+            // 绘制树顶星星和底座（适配手机）
+            const starSize = window.innerWidth < 768 ? 12 : 18;
+            drawStar(canvas.width / 2, canvas.height / 2 - 150, starSize, starSize * 0.55, 5);
+            
+            // 缩小底座尺寸
+            const baseSize = window.innerWidth < 768 ? 25 : 35;
             ctx.beginPath();
-            ctx.rect(canvas.width/2 -35, canvas.height/2 + 80, 70, 35); // 调整底座位置
+            ctx.rect(canvas.width/2 - baseSize, canvas.height/2 + 70, baseSize * 2, baseSize); 
             ctx.fillStyle = "rgba(139, 69, 19, 0.9)";
             ctx.fill();
 
