@@ -1,220 +1,160 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>超真实绚丽圣诞树</title>
+    <title>浪漫圣诞树</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            width: 100vw;
-            height: 100vh;
+            margin: 0;
+            padding: 0;
             background: #000;
+            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
-            overflow: hidden;
-            background-image: radial-gradient(circle at top right, #1a2a6c 0%, #000 50%);
+            height: 100vh;
         }
-        /* 圣诞树容器 */
-        .tree-container {
-            position: relative;
-            width: 400px;
-            height: 600px;
-        }
-        /* 圣诞树主体（多层+纹理） */
+        
         .tree {
             position: relative;
+            width: 300px;
+            height: 500px;
+        }
+        
+        .lights {
+            position: absolute;
             width: 100%;
             height: 100%;
         }
-        /* 树层（纹理+渐变+立体阴影） */
-        .tree-layer {
-            position: absolute;
-            width: 0;
-            height: 0;
-            border-left: 180px solid transparent;
-            border-right: 180px solid transparent;
-            border-bottom: 200px solid;
-            border-bottom-color: #0f5e28;
-            background: 
-                linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 50%),
-                repeating-linear-gradient(45deg, #137532 0%, #137532 5px, #0f5e28 5px, #0f5e28 10px);
-            background-clip: content-box;
-            filter: drop-shadow(0 0 15px #137532) drop-shadow(0 0 30px #13753288);
-            left: 50%;
-            transform: translateX(-50%);
-            animation: layerGlow 4s infinite alternate;
-        }
-        @keyframes layerGlow {
-            0% { border-bottom-color: #0f5e28; filter: drop-shadow(0 0 15px #137532); }
-            100% { border-bottom-color: #18a546; filter: drop-shadow(0 0 30px #18a546); }
-        }
-        /* 树层分布（更自然的堆叠） */
-        .tree-layer:nth-child(1) { top: 0; }
-        .tree-layer:nth-child(2) { 
-            top: 100px; 
-            border-left-width: 140px; 
-            border-right-width: 140px; 
-            border-bottom-width: 160px; 
-            border-bottom-color: #137532;
-        }
-        .tree-layer:nth-child(3) { 
-            top: 220px; 
-            border-left-width: 100px; 
-            border-right-width: 100px; 
-            border-bottom-width: 120px; 
-            border-bottom-color: #18a546;
-        }
-        .tree-layer:nth-child(4) { 
-            top: 320px; 
-            border-left-width: 60px; 
-            border-right-width: 60px; 
-            border-bottom-width: 80px; 
-            border-bottom-color: #18a546;
-        }
-        /* 树干（木质纹理+光影） */
-        .trunk {
-            position: absolute;
-            width: 60px;
-            height: 120px;
-            background: repeating-linear-gradient(90deg, #8b4513 0%, #8b4513 10px, #a0522d 10px, #a0522d 20px);
-            left: 50%;
-            top: 400px;
-            transform: translateX(-50%);
-            border-radius: 4px;
-            box-shadow: 0 0 10px #8b4513;
-        }
-        /* 星星（动态脉冲+光晕） */
-        .star {
-            position: absolute;
-            width: 60px;
-            height: 60px;
-            background: #f1c40f;
-            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
-            left: 50%;
-            top: -30px;
-            transform: translateX(-50%);
-            filter: drop-shadow(0 0 20px #f1c40f) drop-shadow(0 0 40px #f1c40f88);
-            animation: starPulse 2s infinite alternate;
-        }
-        @keyframes starPulse {
-            0% { transform: translateX(-50%) scale(1); }
-            100% { transform: translateX(-50%) scale(1.2); }
-        }
-        /* 装饰灯（光斑+动态闪烁） */
+        
         .light {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 8px;
+            height: 8px;
             border-radius: 50%;
-            filter: drop-shadow(0 0 15px currentColor) blur(2px);
-            animation: lightBlink 2s infinite alternate;
+            animation: twinkle 1s infinite alternate;
         }
-        @keyframes lightBlink {
-            0% { opacity: 0.6; transform: scale(0.8); }
-            100% { opacity: 1; transform: scale(1.2); }
-        }
-        /* 雪花（自然飘落+大小渐变） */
-        .snowflake {
+        
+        .star {
             position: absolute;
-            color: #fff;
-            font-size: 12px;
-            opacity: 0.8;
-            animation: snowFall linear infinite;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 30px;
+            height: 30px;
+            background: gold;
+            clip-path: polygon(
+                50% 0%,
+                61% 35%,
+                98% 35%,
+                68% 57%,
+                79% 91%,
+                50% 70%,
+                21% 91%,
+                32% 57%,
+                2% 35%,
+                39% 35%
+            );
+            animation: glow 1s infinite alternate;
+        }
+        
+        .snow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
             pointer-events: none;
         }
-        @keyframes snowFall {
-            0% {
-                transform: translateY(-20px) rotate(0deg);
-                opacity: 0;
-            }
-            10% { opacity: 0.8; }
-            90% { opacity: 0.8; }
-            100% {
-                transform: translateY(100vh) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        /* 背景星光 */
-        .star-bg {
-            position: absolute;
-            width: 2px;
-            height: 2px;
-            background: #fff;
-            border-radius: 50%;
-            animation: starTwinkle 3s infinite alternate;
-        }
-        @keyframes starTwinkle {
-            0% { opacity: 0.2; }
+        
+        @keyframes twinkle {
+            0% { opacity: 0.3; }
             100% { opacity: 1; }
+        }
+        
+        @keyframes glow {
+            0% { box-shadow: 0 0 5px gold; }
+            100% { box-shadow: 0 0 20px gold, 0 0 30px gold; }
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-10px) rotate(0deg); }
+            100% { transform: translateY(500px) rotate(360deg); }
         }
     </style>
 </head>
 <body>
-    <div class="tree-container">
+    <div class="tree">
         <div class="star"></div>
-        <div class="tree-layer"></div>
-        <div class="tree-layer"></div>
-        <div class="tree-layer"></div>
-        <div class="tree-layer"></div>
-        <div class="trunk"></div>
+        <div class="lights" id="lights"></div>
+        <div class="snow" id="snow"></div>
     </div>
 
     <script>
-        // 生成装饰灯（多彩光斑）
-        const lightColors = ['#ff4444', '#44ff44', '#4444ff', '#ffff44', '#ff44ff', '#44ffff'];
-        const tree = document.querySelector('.tree-container');
-        const lightCount = 20;
-        for (let i = 0; i < lightCount; i++) {
+        // 创建圣诞树灯光
+        const lightsContainer = document.getElementById('lights');
+        const colors = ['#ff0000', '#00ff00', '#0000ff', '#ffff00', '#ff00ff', '#00ffff'];
+        
+        // 创建三角形圣诞树
+        for (let i = 0; i < 150; i++) {
             const light = document.createElement('div');
-            light.classList.add('light');
-            // 随机分布在树层上
-            const layerIndex = Math.floor(Math.random() * 4) + 1;
-            const layer = document.querySelector(`.tree-layer:nth-child(${layerIndex})`);
-            const layerWidth = parseInt(layer.style.borderLeftWidth) || 180;
-            const x = Math.random() * layerWidth * 1.5 - layerWidth * 0.75;
-            const y = Math.random() * parseInt(layer.style.borderBottomWidth) || 200;
-            light.style.left = `${50 + (x / 200) * 50}%`;
-            light.style.top = `${y + (layerIndex - 1) * 100}px`;
-            light.style.color = lightColors[Math.floor(Math.random() * lightColors.length)];
-            light.style.animationDelay = `${Math.random() * 2}s`;
-            tree.appendChild(light);
-        }
-
-        // 生成雪花
-        function createSnowflakes() {
-            const count = 100;
-            const body = document.body;
-            for (let i = 0; i < count; i++) {
-                const snow = document.createElement('div');
-                snow.classList.add('snowflake');
-                snow.textContent = '❄️';
-                snow.style.left = `${Math.random() * 100}vw`;
-                snow.style.fontSize = `${Math.random() * 10 + 5}px`;
-                snow.style.animationDuration = `${Math.random() * 20 + 10}s`;
-                snow.style.animationDelay = `${Math.random() * 10}s`;
-                body.appendChild(snow);
+            light.className = 'light';
+            
+            // 随机位置 (三角形区域内)
+            let x, y;
+            const layer = Math.floor(Math.random() * 3); // 0, 1, 2
+            
+            if (layer === 0) {
+                // 底层
+                y = 300 + Math.random() * 200;
+                x = 150 - (y - 300) * 0.5 + Math.random() * (y - 300);
+            } else if (layer === 1) {
+                // 中层
+                y = 150 + Math.random() * 150;
+                x = 150 - (y - 150) * 0.75 + Math.random() * (y - 150) * 1.5;
+            } else {
+                // 顶层
+                y = 50 + Math.random() * 100;
+                x = 150 - (y - 50) + Math.random() * (y - 50) * 2;
             }
+            
+            light.style.left = x + 'px';
+            light.style.top = y + 'px';
+            light.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+            light.style.animationDelay = Math.random() + 's';
+            
+            lightsContainer.appendChild(light);
         }
-
-        // 生成背景星光
-        function createStarBg() {
-            const count = 200;
-            const body = document.body;
-            for (let i = 0; i < count; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star-bg');
-                star.style.left = `${Math.random() * 100}vw`;
-                star.style.top = `${Math.random() * 100}vh`;
-                star.style.animationDelay = `${Math.random() * 3}s`;
-                body.appendChild(star);
-            }
+        
+        // 创建雪花效果
+        const snowContainer = document.getElementById('snow');
+        
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.style.position = 'absolute';
+            snowflake.style.width = Math.random() * 5 + 3 + 'px';
+            snowflake.style.height = snowflake.style.width;
+            snowflake.style.backgroundColor = 'white';
+            snowflake.style.borderRadius = '50%';
+            snowflake.style.left = Math.random() * 300 + 'px';
+            snowflake.style.top = '-10px';
+            snowflake.style.opacity = Math.random() * 0.5 + 0.5;
+            
+            const animationDuration = Math.random() * 3 + 2;
+            snowflake.style.animation = `fall ${animationDuration}s linear infinite`;
+            
+            snowContainer.appendChild(snowflake);
+            
+            // 移除雪花以优化性能
+            setTimeout(() => {
+                snowflake.remove();
+            }, animationDuration * 1000);
         }
-
-        createSnowflakes();
-        createStarBg();
+        
+        // 定期创建雪花
+        setInterval(createSnowflake, 100);
+        
+        // 初始创建一些雪花
+        for (let i = 0; i < 20; i++) {
+            setTimeout(createSnowflake, Math.random() * 2000);
+        }
     </script>
 </body>
 </html>
-
